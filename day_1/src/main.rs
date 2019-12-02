@@ -1,31 +1,40 @@
 fn main() {
     let input = include_str!("../input.txt");
-    let total_loop = using_loop(input);
-    let total_iter = using_iter(input);
 
-    assert_eq!(total_loop, total_iter);
-    println!("part1: {}", total_iter);
+    let total = part1(input);
+    println!("part1: {}", total);
+
+    let total = part2(input);
+    println!("part2: {}", total);
 }
 
-// bonus benchmark tests
-fn using_loop(input: &str) -> i32 {
-    let mut total = 0;
-    for line in input.lines() {
-        let mass: i32 = line.parse().expect("not a valid integer");
-        total += part1(mass)
-    }
-    total
-}
-
-fn using_iter(input: &str) -> i32 {
+fn part1(input: &str) -> i32 {
     input.lines().into_iter()
         .map(|line| line.parse::<i32>().expect("not a valid integer"))
-        .fold(0, |acc, mass| acc + part1(mass))
+        .fold(0, mass_to_fuel)
+}
+
+fn part2(input: &str) -> i32 {
+    input.lines().into_iter()
+        .map(|line| line.parse::<i32>().expect("not a valid integer"))
+        .fold(0, mass_to_fuel_with_fuel)
 }
 
 /// Converts input mass to required fuel units
-fn part1(input: i32) -> i32 {
-    /* your code here */
+fn mass_to_fuel(acc: i32, mass: i32) -> i32 {
+    acc + ((mass/ 3) - 2)
+}
+
+/// Converts input mass to required fuel units, also taking into account the required
+/// fuel for the fuel itself
+fn mass_to_fuel_with_fuel(acc: i32, mass: i32) -> i32 {
+    let mut total = 0;
+    let mut fuel_mass = mass_to_fuel(0, mass);
+    while fuel_mass > 0 {
+        total += fuel_mass;
+        fuel_mass = mass_to_fuel(0, fuel_mass);
+    }
+    acc + total
 }
 
 #[cfg(test)]
@@ -34,21 +43,41 @@ mod tests_part1 {
 
     #[test]
     fn test_12() {
-        assert_eq!(part1(12), 2);
+        assert_eq!(mass_to_fuel(0, 12), 2);
     }
 
     #[test]
     fn test_14() {
-        assert_eq!(part1(14), 2);
+        assert_eq!(mass_to_fuel(0, 14), 2);
     }
 
     #[test]
     fn test_1969() {
-        assert_eq!(part1(1969), 654);
+        assert_eq!(mass_to_fuel(0, 1969), 654);
     }
 
     #[test]
     fn test_100756() {
-        assert_eq!(part1(100756), 33583);
+        assert_eq!(mass_to_fuel(0, 100756), 33583);
+    }
+}
+
+#[cfg(test)]
+mod tests_part2 {
+    use super::*;
+
+    #[test]
+    fn test_14() {
+        assert_eq!(mass_to_fuel_with_fuel(0, 14), 2);
+    }
+
+    #[test]
+    fn test_1969() {
+        assert_eq!(mass_to_fuel_with_fuel(0, 1969), 966);
+    }
+
+    #[test]
+    fn test_100756() {
+        assert_eq!(mass_to_fuel_with_fuel(0, 100756), 50346);
     }
 }
