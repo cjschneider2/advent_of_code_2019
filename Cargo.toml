@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "day_1",
+    "day_2",
+]
+
+[profile.release]
+debug = true
